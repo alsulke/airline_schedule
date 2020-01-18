@@ -16,16 +16,14 @@ public class Dijkstra {
 		vertexNames = new HashMap<String, Vertex>();
 	}
 
+	public Collection<Vertex> getVertices() {
+		return vertexNames.values();
+	}
 	public void addVertex(Vertex v) {
 		if (vertexNames.containsKey(v.name))
 			throw new IllegalArgumentException("Cannot create new vertex (city) with existing name.");
 		vertexNames.put(v.name, v);
 	}
-
-	public Collection<Vertex> getVertices() {
-		return vertexNames.values();
-	}
-
 	public Vertex getVertex(String name) {
 		return vertexNames.get(name);
 	}
@@ -41,10 +39,6 @@ public class Dijkstra {
 		sourceVertex.addEdge(newEdge);
 	}
 
-	public void addUndirectedEdge(String nameU, String nameV, double cost) { //undirected means 2 directed
-		addEdge(nameU, nameV, cost);
-		addEdge(nameV, nameU, cost);
-	}
 
 	public double computeEuclideanDistance(double ux, double uy, double vx, double vy) {
 
@@ -54,6 +48,10 @@ public class Dijkstra {
 		return distance; 
 	}
 
+	public void addUndirectedEdge(String nameU, String nameV, double cost) { //undirected means 2 directed
+		addEdge(nameU, nameV, cost);
+		addEdge(nameV, nameU, cost);
+	}
 	public void computeAllEuclideanDistances() 
 	{
 	
@@ -257,6 +255,7 @@ public class Dijkstra {
 		System.out.println();
 		
 		System.out.print("Shortest path between "+startCity+" and "+endCity+": ");
+		// Optimal Ininerary 
 		System.out.println(path);
 	}
 }
