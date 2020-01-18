@@ -2,17 +2,12 @@ import threading
 import socket
 import sys
 
-#Class containing the timetable's variables and functions
 class TimeTable:
     timetable = []
     dataLock = threading.Lock()
 
     def addFlight(flight):
         TimeTable.timetable.append(flight)
-
-    def ReturnDetailsStr(index):
-        tmpTuple = ("ROK",TimeTable.timetable[index].code,TimeTable.timetable[index].state,TimeTable.timetable[index].time)
-        return " ".join(tmpTuple)
 
     def SearchFlight(searchItem):
         for x in range(len(TimeTable.timetable)):
@@ -33,8 +28,7 @@ class TimeTable:
         TimeTable.timetable[position].time = protocolData[3]
         return TimeTable.timetable[position]
 
-#Class containing the flight's details
-class Flight:
+class Airline:
 
     def __init__(self,code,state,time):
         self.code = code
@@ -46,7 +40,6 @@ def Worker(conn, add):
     while True:
         data = conn.recv(1024)
         protocolData = data.decode().split(" ")
-        #Reply to the READ action
         if protocolData[0] == "READ":
             TimeTable.dataLock.acquire()
             position = TimeTable.SearchFlight(protocolData[1])
@@ -55,18 +48,6 @@ def Worker(conn, add):
             else:
                 conn.sendall(position.encode())
             TimeTable.dataLock.release()
-        #Reply to the WRITE action
-        elif protocolData[0] == "WRITE":
-            TimeTable.dataLock.acquire()
-            n1W = len(TimeTable.timetable)
-            TimeTable.AddFlight(protocolData)
-            n2W = len(TimeTable.timetable)
-            if n2W > n1W:
-                conn.sendall("WOK".encode())
-            else:
-                conn.sendall("WERR".encode())
-            TimeTable.dataLock.release()
-        #Reply to the DEL action
         elif protocolData[0] == "DEL":
             TimeTable.dataLock.acquire()
             n1D = len(TimeTable.timetable)
@@ -77,7 +58,16 @@ def Worker(conn, add):
             else:
                 conn.sendall("DERR".encode())
             TimeTable.dataLock.release()
-        #Reply to the CHANGE action
+         elif protocolData[0] == "WRITE":
+            TimeTable.dataLock.acquire()
+            n1W = len(TimeTable.timetable)
+            TimeTable.AddFlight(protocolData)
+            n2W = len(TimeTable.timetable)
+            if n2W > n1W:
+                conn.sendall("WOK".encode())
+            else:
+                conn.sendall("WERR".encode())
+            TimeTable.dataLock.release()
         elif protocolData[0] == "CHANGE":
             TimeTable.dataLock.acquire()
             changedObj = TimeTable.ChangeFlight(protocolData)
@@ -89,7 +79,7 @@ def Worker(conn, add):
 
 
 def main():
-    f1 = Flight("ah123","boarding","17.30")
+    f1 = Airline("c129","boarding","21.30")
 
     TimeTable.addFlight(f1)
 
@@ -101,7 +91,7 @@ def main():
     doorSock.listen(10)
 
     while True:
-        print("Waiting for a connection...")
+        print("Initializing.......")
 
         conn, add = doorSock.accept()
 
